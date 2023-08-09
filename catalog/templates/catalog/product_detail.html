@@ -1,13 +1,16 @@
-{% extends 'catalog/home.html' %}
+{% extends 'catalog/base.html' %}
+{% load custom_filters %}
 
 {% block content %}
-    <h1>{{ product.name }}</h1>
-    <p>Description: {{ product.description }}</p>
-    <p>Category: {{ product.category.name }}</p>
-    <p>Price: {{ product.price }}</p>
+<h1>{{ product.name }}</h1>
+<p>Description: {{ product.description }}</p>
+<p>Category: {{ product.category.name }}</p>
+<img src="{{ product.image|mediapath }}" alt="Product Image">
+<p>Price: {{ product.price }}</p>
 
-    <a href="{% url 'catalog:home' %}">Back to Home</a>
+<a href="{% url 'catalog:home' %}">Back to Home</a>
 {% endblock %}
+
 
 
 
