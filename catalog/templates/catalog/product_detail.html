@@ -1,14 +1,25 @@
 {% extends 'catalog/base.html' %}
-{% load custom_filters %}
 
-{% block content %}
-<h1>{{ product.name }}</h1>
-<p>Description: {{ product.description }}</p>
-<p>Category: {{ product.category.name }}</p>
-<img src="{{ product.image|mediapath }}" alt="Product Image">
-<p>Price: {{ product.price }}</p>
+{% block content%}
 
-<a href="{% url 'catalog:home' %}">Back to Home</a>
+    <div class="container">
+        <div class="row">
+            <!-- Левая часть с изображением -->
+            <div class="col-md-4">
+                <img src="/media/123.jpeg" alt="Изображение товара" class="img-fluid">
+            </div>
+
+            <!-- Правая часть с информацией о товаре -->
+            <div class="col-md-8">
+                <h2>{{ product.title }}</h2>
+                <p>Описание товара: {{ product.text }}</p>
+                <p>Цена: {{ product.price }} руб.</p>
+                <button class="btn btn-primary">Положить в корзину</button>
+            </div>
+
+
+        </div>
+    </div>
 {% endblock %}
 
 

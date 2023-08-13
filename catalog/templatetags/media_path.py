@@ -5,5 +5,7 @@ register = template.Library()
 
 
 @register.filter
-def mediapath(image_path):
-    return f"{settings.MEDIA_URL}{image_path}"
+def media_path(image_path):
+    if image_path:
+        return image_path.url
+    return '/media/blog/net.png'

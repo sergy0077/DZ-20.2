@@ -1,11 +1,6 @@
-
 {% extends 'catalog/base.html' %}
 
-{% block title %}Контакты{% endblock %}
-
-{% block content %}
-<h1>Контакты</h1>
-<div class="container">
+    {% block content%}
     <div class="row text-start">
         <div class="col-lg-9 col-md-6 col-sm-12">
             <div class="card mb-4 box-shadow">
@@ -45,14 +40,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="message">Сообщение</label>
-                            <textarea type="text" name="message" class="form-control" id="message" placeholder="Контактный телефон" required></textarea>
+                            <textarea type="text" name="message" class="form-control" id="message" placeholder="Ваше сообщение" required></textarea>
                         </div>
-                    </form>
+
                     <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Отправить</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<a class="p-2 btn btn-outline-primary" href="{% url 'catalog:home' %}">Каталог</a>
-{% endblock %}
+    {% endblock %}
