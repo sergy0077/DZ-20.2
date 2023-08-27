@@ -16,16 +16,34 @@
             <img src="{{ product.image|media_path }}" alt="{{ product.title }}" class="img-fluid">
             {% endif %}
             <p class="card-text">{{ product.text|truncatechars:100 }}</p>
-            <a href="{% url 'product_detail' product.id %}" class="btn btn-primary">Купить</a>
+            {% if product.active_version %}
+               {{ product.active_version }}
+            <p class="card-text">Активная версия: {{ product.active_version.version_number }} - {{ product.active_version.version_name }}</p>
+            {% endif %}
+            <a href="{% url 'catalog:product_detail' product.id %}" class="btn btn-primary">Купить</a>
+            <a href="{% url 'catalog:product_edit' product.id %}" class="btn btn-secondary">Редактировать</a>
+            <a href="{% url 'catalog:product_delete' product.id %}" class="btn btn-danger">Удалить</a>
           </div>
         </div>
       </div>
     </div>
-    {% if forloop.counter|divisibleby:"4" and not forloop.last %}
+    {% if forloop.Counter|divisibleby:"4" and not forloop.last %}
   </div>
   <div class="row text-center">
     {% endif %}
     {% endfor %}
+    <div class="col-3">
+      <div class="card mb-4 box-shadow">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title">Добавить продукт</h3>
+            <p class="card-text">Добавьте новый продукт в меню.</p>
+            <a href="{% url 'catalog:product_create' %}" class="btn btn-success">Добавить</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
+

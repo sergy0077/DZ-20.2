@@ -9,7 +9,7 @@ from django.shortcuts import render
 
 
 class BlogCreateView(CreateView):
-    """блога для новой статьи"""
+    """создания блога для новой статьи"""
 
     model = Blog
     fields = ('title', 'description', 'creation_date', 'preview', 'is_published')
@@ -18,14 +18,6 @@ class BlogCreateView(CreateView):
 
     def form_valid(self, form):
         """slug-name для заголовка"""
-
-        # if form.is_valid():
-        #     new_mat = form.save()
-        #     new_mat.slug = slugify(new_mat.title)
-        #     new_mat.save()
-        #
-        # return super().form_valid(form)
-    def form_valid(self, form):
         if form.is_valid():
             new_blog = form.save(commit=False)
             new_blog.slug = slugify(new_blog.title)
@@ -76,20 +68,6 @@ class BlogDetailView(DetailView):
         self.object.save()
 
         return self.object
-
-
-# class BlogDetailView(DetailView):
-#     model = Blog
-#     template_name = 'blog/blog_detail.html'
-#     context_object_name = 'blog'
-#
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         queryset = queryset.filter(is_published=True)
-#         return queryset
-#
-#     def get_object(self, queryset=None):
-#         return self.model.objects.get(pk=self.kwargs['pk'])
 
 
 class BlogUpdateView(UpdateView):

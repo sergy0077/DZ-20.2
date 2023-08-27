@@ -1,0 +1,21 @@
+{% extends 'catalog/base.html' %}
+{% block content %}
+<div class="container">
+    <a href="{% url 'admin:catalog_category_add' %}">Создать новую категорию</a>
+    <div class="row mt-3">
+        {% for object in object_list %}
+        <div class="col-4">
+            <div class="card" style="width: 25rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ object.title }}</h5>
+                    <p class="card-text">{{ object.text | linebreaks }}</p>
+                    <a href="{% url 'catalog:category_detail' object.pk %}">Просмотреть категорию</a>
+                    <a href="{% url 'catalog:category_detail' object.pk %}" type="button" class="btn btn-info btn-sm">к товарам</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
