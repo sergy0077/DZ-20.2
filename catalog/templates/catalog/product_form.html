@@ -7,6 +7,11 @@
             <div class="card">
                 <div class="card-header">Добавление продукта</div>
                 <div class="card-body">
+                    <p class="card-text">Активные версии:
+                         {% for version in product.get_active_versions %}
+                              {{ version }}
+                         {% endfor %}
+                    </p>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form.as_p }}

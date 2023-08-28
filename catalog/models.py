@@ -53,6 +53,9 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('catalog:index')
 
+    def get_active_versions(self):
+        return self.version_set.filter(is_active=True)
+
 
 class Category(models.Model):
     title = models.CharField(max_length=150, verbose_name='наименование')
