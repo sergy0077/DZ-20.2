@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from PIL import Image
 
+from users.models import User
+
 NULLABLE = {'blank': True, 'null': True}
 
 
@@ -22,6 +24,7 @@ class Product(models.Model):
     is_allowed = models.BooleanField(default=True)  # поле для контроля разрешенных продуктов
     active_versions = models.ManyToManyField('Version', related_name='products_with_active_version', blank=True)
     slug = models.SlugField(max_length=100, verbose_name='slug')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='владелец', blank=True, null=True)
 
     def __str__(self):
         # Cтроковое отображение объекта

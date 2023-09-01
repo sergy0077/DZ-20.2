@@ -17,8 +17,15 @@
                         {{ version.version_name }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
-                    <a href="{% url 'catalog:product_edit' product.id %}" class="btn btn-primary">Редактировать</a>
-                    <a href="{% url 'catalog:product_delete' product.id %}" class="btn btn-danger">Удалить</a>
+                        {% if user.is_authenticated and object.lashed == user %}
+                            <a href="{% url 'catalog:product_edit' product.id %}" type="button" class="btn btn-primary">Изменить</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <a href="{% url 'catalog:product_delete' product.id %}" type="button"
+                            class="btn btn-primary">Удалить</a>
+                        {% endif %}
+<!--                    <a href="{% url 'catalog:product_edit' product.id %}" class="btn btn-primary">Редактировать</a>-->
+<!--                    <a href="{% url 'catalog:product_delete' product.id %}" class="btn btn-danger">Удалить</a>-->
                 </div>
             </div>
         </div>

@@ -8,6 +8,11 @@ from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic.detail import DetailView
 
+# from .forms import CustomUserCreationForm
+# from django.contrib.auth.mixins import LoginRequiredMixin
+# from django.views.generic.edit import CreateView
+# from .models import Product
+
 
 class IndexView(View):
     """Контроллер для отображения страницы со списком всех продуктов"""
@@ -85,7 +90,11 @@ class ProductCreateView(CreateView):
     def form_valid(self, form):
         """Валидатор запрещенных слов"""
         form.instance.clean()  # Вызов валидации перед сохранением
-        # Сначала вызываем метод form_valid класса-родителя, чтобы создать объект Product
+        product = form.save(commit=False)
+        """Привязка продукта к авторизованному пользователю"""
+        product.owner = self.request.user
+        product.save()
+        # вызываем метод form_valid класса-родителя, чтобы создать объект Product
         response = super().form_valid(form)
 
         # Создание новой версии
@@ -150,3 +159,14 @@ def blog_list_view(request):
     """Контроллер для отображения блоговой информации."""
     blogs = Blog.objects.all()
     return render(request, 'blog/list.html', {'blogs': blogs})
+
+
+##########################################################################
+
+# class CreateProductView(LoginRequiredMixin, CreateView):
+#     model = Product
+#     fields = ['name', 'description', 'user']  # Поле user добавлено для привязки к пользователю
+#
+#     def form_valid(self, form):
+#         form.instance.user = self.request.user
+#         return super().form_valid(form)
