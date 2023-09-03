@@ -1,17 +1,15 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
-from django.views.generic.edit import DeleteView, UpdateView
+from django.views.generic.edit import DeleteView
 from blog.models import Blog
-from .forms import ProductForm, ProductVersionForm
+from .forms import ProductForm
 from .models import Product, Version, Category
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic.detail import DetailView
-
-# from .forms import CustomUserCreationForm
-# from django.contrib.auth.mixins import LoginRequiredMixin
-# from django.views.generic.edit import CreateView
-# from .models import Product
 
 
 class IndexView(View):
@@ -60,6 +58,7 @@ class ProductDetailView(View):
 
 
 class CategoryListView(ListView):
+    """Список категорий продуктов"""
     model = Category
     extra_context = {
         'title': 'Категории товаров'
@@ -67,6 +66,7 @@ class CategoryListView(ListView):
 
 
 class CategoryDetailView(DetailView):
+    """Карточка категории продукта"""
     model = Category
     template_name = 'catalog/category_detail.html'
     context_object_name = 'category'
@@ -77,7 +77,7 @@ class CategoryDetailView(DetailView):
         return self.render_to_response(context)
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     """Контроллер для создания новых продуктов пользователем."""
     model = Product
     form_class = ProductForm
@@ -115,15 +115,21 @@ class ProductCreateView(CreateView):
         return response
 
 
-class ProductUpdateView(UpdateView):
-    """Контроллер для редактирования продуктов"""
-    model = Product
-    form_class = ProductVersionForm
+class ProductUpdateView(View):
+    """Контроллер редактирования продуктов с модерацией на владельца"""
     template_name = 'catalog/product_edit_form.html'
-    success_url = reverse_lazy('catalog:index')
-    extra_context = {
-        'title': 'Редактировать продукт:'
-    }
+
+    def get(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if request.user != product.owner and not request.user.is_staff:
+            return HttpResponseForbidden("Доступ запрещен")
+        return render(request, self.template_name, {'product': product})
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if request.user != product.owner and not request.user.is_staff:
+            return HttpResponseForbidden("Доступ запрещен")
+        return redirect('catalog:index')
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -140,9 +146,8 @@ class ProductDeleteView(DeleteView):
         'title': 'Удаление записи:'
     }
 
-
 #########################################################################
-
+@login_required
 def contacts(request):
     """Контроллер для отображения контактной информации."""
     if request.method == 'POST':
@@ -154,7 +159,7 @@ def contacts(request):
 
 
 #########################################################################
-
+@login_required
 def blog_list_view(request):
     """Контроллер для отображения блоговой информации."""
     blogs = Blog.objects.all()
@@ -162,11 +167,3 @@ def blog_list_view(request):
 
 
 ##########################################################################
-
-# class CreateProductView(LoginRequiredMixin, CreateView):
-#     model = Product
-#     fields = ['name', 'description', 'user']  # Поле user добавлено для привязки к пользователю
-#
-#     def form_valid(self, form):
-#         form.instance.user = self.request.user
-#         return super().form_valid(form)

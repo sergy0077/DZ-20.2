@@ -25,6 +25,7 @@ class Product(models.Model):
     active_versions = models.ManyToManyField('Version', related_name='products_with_active_version', blank=True)
     slug = models.SlugField(max_length=100, verbose_name='slug')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='владелец', blank=True, null=True)
+    is_published = models.BooleanField(default=False, verbose_name='опубликовано')
 
     def __str__(self):
         # Cтроковое отображение объекта
@@ -34,6 +35,12 @@ class Product(models.Model):
         verbose_name = 'продукт'  # настройка наименования для одного объекта
         verbose_name_plural = 'продукты'
         ordering = ('title',)
+        permissions = [
+            (
+                'set_published',
+                'Can publish product'
+            )
+        ]
 
     def clean(self):
         forbidden_words = ['казино', 'криптовалюта', 'крипта', 'биржа', 'дешево', 'бесплатно', 'обман', 'полиция',

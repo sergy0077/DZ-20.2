@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
@@ -40,12 +41,14 @@ class UserDetailView(LoginRequiredMixin, DetailView):
 """МЕТОДЫ"""
 
 
+@login_required
 def confirm_email(request):
     """для подтверждения почты"""
     confirm_user_email(request, request.user)
     return redirect(reverse('users:profile'))
 
 
+@login_required
 def activate_email(request, key):
     """для активации почты"""
     print(request.user.email_confirm_key, key, sep='\n')
@@ -58,6 +61,7 @@ def activate_email(request, key):
     return redirect('/')
 
 
+@login_required
 def password_reset(request):
     """для генерации пароля для неавторизованного пользователя"""
     if request.method == 'POST':

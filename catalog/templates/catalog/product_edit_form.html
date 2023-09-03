@@ -11,6 +11,12 @@
                         {% csrf_token %}
                         {{ form.as_p }}
                         {{ form.versions }}
+
+                        {% if user.is_staff %}
+                           <label for="id_is_published">Опубликовать продукт:</label>
+                           <input type="checkbox" name="is_published" id="id_is_published" {% if product.is_published %}checked{% endif %}>
+                        {% endif %}
+
                         <button type="submit" class="btn btn-outline-success">Сохранить изменения</button>
                     </form>
                 </div>
