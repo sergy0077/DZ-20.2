@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
 from django.views.generic.edit import DeleteView
@@ -115,26 +115,27 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
-class ProductUpdateView(View):
+class ProductUpdateView(LoginRequiredMixin, View):
     """Контроллер редактирования продуктов с модерацией на владельца"""
     template_name = 'catalog/product_edit_form.html'
+    login_url = 'users:login'
 
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         if request.user != product.owner and not request.user.is_staff:
             return HttpResponseForbidden("Доступ запрещен")
-        return render(request, self.template_name, {'product': product})
+        form = ProductForm(instance=product)
+        return render(request, self.template_name, {'product': product, 'form': form})
 
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         if request.user != product.owner and not request.user.is_staff:
             return HttpResponseForbidden("Доступ запрещен")
-        return redirect('catalog:index')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.object.active_versions.set(form.cleaned_data['active_versions'])
-        return response
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('catalog:index')
+        return render(request, self.template_name, {'product': product, 'form': form})
 
 
 class ProductDeleteView(DeleteView):
@@ -145,6 +146,19 @@ class ProductDeleteView(DeleteView):
     extra_context = {
         'title': 'Удаление записи:'
     }
+
+    def post(self, request, *args, **kwargs):
+        # Получаем объект Product, который мы хотим удалить
+        product = self.get_object()
+
+        # Удаляем связанные Version перед удалением Product
+        versions = Version.objects.filter(product=product)
+        versions.delete()
+
+        # Удаляем Product
+        product.delete()
+
+        return HttpResponseRedirect(self.success_url)
 
 #########################################################################
 @login_required

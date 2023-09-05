@@ -16,6 +16,7 @@ def is_owner(user):
 
 """Контроллеры"""
 
+
 class BlogCreateView(CreateView):
     """создания блога для новой статьи"""
 
@@ -105,3 +106,4 @@ class BlogDeleteView(DeleteView):
         if not self.request.user.is_staff:
             return HttpResponseForbidden("У вас нет прав для удаления этой статьи.")
         return super().dispatch(request, *args, **kwargs)
+
