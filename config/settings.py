@@ -11,12 +11,15 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 from django.conf.urls import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+dot_env = os.path.join(BASE_DIR, '.env')
+load_dotenv(dotenv_path=dot_env)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -83,9 +86,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'project',
-        'USER': 'postgres',
-        'PASSWORD': '130468',
+        'NAME': os.getenv('DATABASES_NAME'),
+        'USER': os.getenv('DATABASES_USER'),
+        'PASSWORD': os.getenv('DATABASES_PASSWORD'),
         'HOST': 'localhost',  # или IP-адрес сервера PostgreSQL
         'PORT': '5432',       # порт, на котором запущен PostgreSQL
     }
@@ -146,11 +149,22 @@ EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'sky_pro2023@mail.ru'         # Почта создана для учебных целей
-EMAIL_HOST_PASSWORD = 'dp2the7Mx6HkAsgC2tLj'    # Пароль для внешнего Django-приложения
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')         # Почта для внешнего Django-приложения, создана для учебных целей
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')    # Пароль для внешнего Django-приложения
 
 AUTH_USER_MODEL = 'users.User'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/users/login/'  # путь к странице входа для пользователей
+
+
+CACHE_ENABLED = os.getenv('CACHE_ENABLED') == 'True'
+
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": os.getenv('CACHE_LOCATION'),
+        }
+    }

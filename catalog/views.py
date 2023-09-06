@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect, Http404
 from django.urls import reverse_lazy
+from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, CreateView
 from django.views.generic.edit import DeleteView
 from blog.models import Blog
@@ -11,9 +12,40 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic.detail import DetailView
 
+from .services import get_categories
+
+
+class CategoryListView(ListView):
+    """Контроллер для отображения списка категорий продуктов"""
+    extra_context = {
+        'title': 'Категории товаров'
+    }
+
+    def get_queryset(self):
+        # Используем нашу сервисную функцию для получения категорий
+        return get_categories()
+
+
+class CategoryDetailView(DetailView):
+    """Контроллер для отображения карточки категории продукта"""
+    template_name = 'catalog/category_detail.html'
+    context_object_name = 'category'
+
+    def get_object(self):
+        category_id = self.kwargs['pk']
+        categories = get_categories()
+
+        # Ищем категорию с нужным id в списке категорий
+        for category in categories:
+            if category.id == category_id:
+                return category
+
+        # Если категория не найдена, вернем 404
+        raise Http404("Категория не найдена")
+
 
 class IndexView(View):
-    """Контроллер для отображения страницы со списком всех продуктов"""
+    """Контроллер для отображения списка всех продуктов"""
     model = Product
     template_name = 'catalog/index.html'
 
@@ -33,10 +65,11 @@ class IndexView(View):
 
 
 class ProductDetailView(View):
-    """Контроллер для отображения продуктов."""
+    """Контроллер для отображения карточки продукта."""
     model = Product
     template_name = 'catalog/product_detail.html'
 
+    @cache_page(60 * 15)  # Кешировать страницу на 15 минут
     def get(self, request, product_id):
         product = get_object_or_404(Product, pk=product_id)
         return render(request, self.template_name, {'product': product})
@@ -57,26 +90,6 @@ class ProductDetailView(View):
         return context_data
 
 
-class CategoryListView(ListView):
-    """Список категорий продуктов"""
-    model = Category
-    extra_context = {
-        'title': 'Категории товаров'
-    }
-
-
-class CategoryDetailView(DetailView):
-    """Карточка категории продукта"""
-    model = Category
-    template_name = 'catalog/category_detail.html'
-    context_object_name = 'category'
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
-
-
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """Контроллер для создания новых продуктов пользователем."""
     model = Product
@@ -88,7 +101,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     }
 
     def form_valid(self, form):
-        """Валидатор запрещенных слов"""
+        """Контроллер для валидации запрещенных слов"""
         form.instance.clean()  # Вызов валидации перед сохранением
         product = form.save(commit=False)
         """Привязка продукта к авторизованному пользователю"""
@@ -139,7 +152,7 @@ class ProductUpdateView(LoginRequiredMixin, View):
 
 
 class ProductDeleteView(DeleteView):
-    """Контроллер для удаления продуктов"""
+    """Контроллер для удаления продукта"""
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('catalog:index')
